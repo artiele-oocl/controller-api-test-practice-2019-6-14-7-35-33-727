@@ -3,7 +3,6 @@ package com.tw.api.unit.test.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tw.api.unit.test.domain.todo.Todo;
 import com.tw.api.unit.test.domain.todo.TodoRepository;
-import com.tw.api.unit.test.services.ShowService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,24 +77,23 @@ public class TodoControllerTest {
                 .andExpect(jsonPath("$.order").value(5))
         ;
     }
-//    @Test
-//    void saveTodo() throws Exception {
-//        //given
-//        Todo todo = new Todo(1, "sample title", false, 2);
-//
-//        todoRepository.add(todo);
-//        when(todoRepository.add(todo)).thenReturn(todo);
-//        //when
-//        ResultActions result = mvc.perform(post("/todos"));
-//        //then
-//        result.andExpect(status().isOk())
-//                .andDo(print())
-//                .andExpect(jsonPath("$.id").value(1))
-//                .andExpect(jsonPath("$.title").value("sample title"))
-//                .andExpect(jsonPath("$.completed").value(false))
-//                .andExpect(jsonPath("$.order").value(2))
-//        ;
-//    }
+    @Test
+    void saveTodo() throws Exception {
+        //given
+        Todo todo = new Todo(1, "sample title", false, 2);
+        todoRepository.add(todo);
+        when(todoRepository.findById(1)).thenReturn(Optional.of(todo));
+        //when
+        ResultActions result = mvc.perform(post("/todos").contentType("application/json").content(objectMapper.writeValueAsString(todo)));
+        //then
+        result.andExpect(status().isCreated())
+                .andDo(print())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.title").value("sample title"))
+                .andExpect(jsonPath("$.completed").value(false))
+                .andExpect(jsonPath("$.order").value(2))
+        ;
+    }
     @Test
     void deleteOneTodo() throws Exception {
         //given
