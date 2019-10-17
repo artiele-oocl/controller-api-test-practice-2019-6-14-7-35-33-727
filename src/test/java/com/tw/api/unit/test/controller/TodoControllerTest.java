@@ -95,7 +95,19 @@ public class TodoControllerTest {
         ;
     }
     @Test
-    void deleteOneTodo() throws Exception {
+    void should_return_not_found_when_id_does_not_exist_on_delete() throws Exception {
+        //given
+        Todo todo = new Todo(1, "sample title", false, 2);
+        todoRepository.add(todo);
+        when(todoRepository.findById(1)).thenReturn(java.util.Optional.of(todo));
+        //when
+        ResultActions result = mvc.perform(delete("/todos/2"));
+        //then
+        result.andExpect(status().isNotFound())
+        ;
+    }
+    @Test
+    void should_return_statusOK_on_delete() throws Exception {
         //given
         Todo todo = new Todo(1, "sample title", false, 2);
         todoRepository.add(todo);
@@ -107,7 +119,7 @@ public class TodoControllerTest {
         ;
     }
     @Test
-    void updateTodo() throws Exception {
+    void should_return_updated_todo() throws Exception {
         //given
         Todo todo = new Todo(1, "sample title", false, 2);
         Todo newTodo = new Todo(1, "Edited title", false, 2);
@@ -121,6 +133,40 @@ public class TodoControllerTest {
         ResultActions result = mvc.perform(patch("/todos/1").contentType("application/json").content(objectMapper.writeValueAsString(newTodo)));
         //then
         result.andExpect(status().isOk())
+        ;
+    }
+    @Test
+    void should_return_not_found_when_id_does_not_exist_on_update() throws Exception {
+        //given
+        Todo todo = new Todo(1, "sample title", false, 2);
+        Todo newTodo = new Todo(1, "Edited title", false, 2);
+        todoRepository.add(todo);
+        Optional<Todo> optionalTodo = Optional.of(todo);
+        when(todoRepository.findById(1)).thenReturn(optionalTodo);
+        todoRepository.delete(optionalTodo.get());
+
+        todoRepository.add(newTodo);
+        //when
+        ResultActions result = mvc.perform(patch("/todos/2").contentType("application/json").content(objectMapper.writeValueAsString(newTodo)));
+        //then
+        result.andExpect(status().isNotFound())
+        ;
+    }
+    @Test
+    void should_return_bad_request_when_trying_to_update_to_null() throws Exception {
+        //given
+        Todo todo = new Todo(1, "sample title", false, 2);
+        Todo newTodo = null;
+        todoRepository.add(todo);
+        Optional<Todo> optionalTodo = Optional.of(todo);
+        when(todoRepository.findById(1)).thenReturn(optionalTodo);
+        todoRepository.delete(optionalTodo.get());
+
+        todoRepository.add(newTodo);
+        //when
+        ResultActions result = mvc.perform(patch("/todos/1").contentType("application/json").content(objectMapper.writeValueAsString(null)));
+        //then
+        result.andExpect(status().isBadRequest())
         ;
     }
 }
